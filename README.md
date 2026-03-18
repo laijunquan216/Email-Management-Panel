@@ -1,107 +1,110 @@
-## 项目介绍
+# Email-Management-Panel
 
-搞这个项目主要是因为之前的 `MS_OAuth2API` 代码质量有点问题，维护起来越来越麻烦。  
-所以在它的基础上做了优化，修复了一些bug，提升了代码质量和可维护性，这就是 `MS_OAuth2API_Next` 啦。  
-有任何问题或建议，欢迎在项目仓库中提交 `issue`。  
-或联系我: [z@unix.xin](mailto:z@unix.xin)  
-体验地址: [https://mon.unix.xin/](https://mon.unix.xin/)
+邮箱管理面板 + 邮件 API 服务端（支持 WebUI 登录鉴权）。
 
+- 项目地址：<https://github.com/laijunquan216/Email-Management-Panel>
+- 支持系统：Ubuntu / Debian
 
-### 版本说明
-- `MS_OAuth2API_Next` 只用来部署在服务器上
-- `MS_OAuth2API` 后续只针对于 Vercel 版本更新
+---
 
-### 维护计划
-- 要是微软更新了 OAuth2 的规则，`MS_OAuth2API` 的 Vercel 版本会同步维护
-- 服务器版本的功能更新和bug修复，都会在 `MS_OAuth2API_Next` 里进行
+## 一键安装（推荐）
 
-下面是 `MS_OAuth2API_Next` 的一些功能和优势：
+你说得对，手动部署太麻烦。现在直接提供一键脚本：
 
-- 自动判断使用graph协议还是imap协议
-    - graph协议: 微软的新协议，支持更多的功能，比如获取邮件附件、发送邮件等
-    - imap协议: 微软的旧协议，支持的功能比较少
-- 支持redis缓存，避免重复请求微软服务器，提高响应速度
-- 支持传入proxy代理，防止服务器IP受限
-    - 支持socks5代理(格式: `socks5://username:password@ip:port`)
-    - 支持http代理(格式: `http://ip:port`)
-    - 查询代理是否使用成功，可以通过`/api/test-proxy`接口，通过返回的IP是否与代理IP一致来判断
-    - 支持默认代理池, 可以在API不传入代理的情况下，使用默认代理池中的代理（TODO 待实现）
-- 支持邮箱验证，两种方式(TODO 待实现)
-    - 规则验证(通过判断邮箱格式)
-    - 精确验证(需要配合数据库，判断邮箱是否存在)
-- 配套使用页面 + 客户端
-    - 支持邮箱导入
-    - 支持邮箱验证
-    - 支持邮箱清空
-    - 支持邮件查看
-- 支持Docker部署(TODO 待实现)
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/laijunquan216/Email-Management-Panel/main/scripts/install.sh)
+```
 
-### 使用说明
-- 部署流程
-    - 克隆项目到服务器 ` git clone https://github.com/HChaoHui/MS_OAuth2API_Next`
-    - 进入项目目录 `cd MS_OAuth2API_Next`
-    - 安装依赖 `npm install`
-    - 配置环境变量 见`.env`
-    - 启动项目 `npm run start`
-    - 配套资源文件在 `web/MS_OAuth2API_Next_Web` 目录下，如需自定义，修改后打包即可，项目会读取`web/MS_OAuth2API_Next_Web/dist`目录下的文件
-    - 修改请保留作者信息，谢谢
+> 如果你是从本地仓库执行，也可以：
+>
+> ```bash
+> chmod +x scripts/install.sh
+> ./scripts/install.sh
+> ```
 
-- Redis 配置
-    - `USE_REDIS` 为 `1` 时，开启 Redis 缓存
-    - `USE_REDIS` 为 `0` 时，关闭 Redis 缓存
-    - `REDIS_HOST` 为 Redis 服务器地址
-    - `REDIS_PORT` 为 Redis 服务器端口
+### 一键脚本会做什么？
 
-## 📚 API 文档
+- 自动安装运行依赖（Node.js 20、git、build-essential、pm2）
+- 自动拉取/更新项目代码
+- 自动安装后端和前端依赖并打包 Web
+- 安装时可交互设置：
+  - 服务端口（默认 3000）
+  - WebUI 登录密码（可留空）
+  - Nginx 反向代理（可选，支持跳过；仅选择时才安装/配置 Nginx）
+- 自动用 PM2 后台常驻启动，并尝试设置开机自启
 
-### 获取最新的一封邮件
+---
 
-- **方法**: `GET/POST`
-- **URL**: `/api/mail_new`
-- **描述**: 获取最新的一封邮件。
-- **参数说明**:
-  - `refresh_token` (必填): 用于身份验证的 refresh_token。
-  - `client_id` (必填): 客户端 ID。
-  - `email` (必填): 邮箱地址。
-  - `mailbox` (必填): 邮箱文件夹，支持的值为 `INBOX` 或 `Junk`。
-  - `socks5` (可选): socks5 代理地址，格式为 `socks5://username:password@ip:port`。
-  - `http` (可选): http 代理地址，格式为 `http://ip:port`。
+## 环境变量（精简版）
 
-### 获取全部邮件
+`.env` 示例：
 
-- **方法**: `GET/POST`
-- **URL**: `/api/mail_all`
-- **描述**: 获取全部邮件。
-- **参数说明**:
-  - `refresh_token` (必填): 用于身份验证的 refresh_token。
-  - `client_id` (必填): 客户端 ID。
-  - `email` (必填): 邮箱地址。
-  - `mailbox` (必填): 邮箱文件夹，支持的值为 `INBOX` 或 `Junk`。
-  - `socks5` (可选): socks5 代理地址，格式为 `socks5://username:password@ip:port`。
-  - `http` (可选): http 代理地址，格式为 `http://ip:port`。
+```env
+## WebUI 登录密码（为空则关闭 WebUI 鉴权）
+WEBUI_PASSWORD=
 
-### 清空收件箱
+## Redis 配置
+USE_REDIS=0
+REDIS_HOST=localhost
+REDIS_PORT=50002
 
-- **方法**: `GET/POST`
-- **URL**: `/api/process-mailbox`
-- **描述**: 清空收件箱。
-- **参数说明**:
-  - `refresh_token` (必填): 用于身份验证的 refresh_token。
-  - `client_id` (必填): 客户端 ID。
-  - `email` (必填): 邮箱地址。
-  - `mailbox` (必填): 邮箱文件夹，支持的值为 `INBOX` 或 `Junk`。
-  - `socks5` (可选): socks5 代理地址，格式为 `socks5://username:password@ip:port`。
-  - `http` (可选): http 代理地址，格式为 `http://ip:port`。
+## 服务端口
+PORT=3000
+```
 
-### 代理测试
+### 关于 `API_PASSWORD`
 
-- **方法**: `GET/POST`
-- **URL**: `/api/test-proxy`
-- **描述**: 测试代理是否生效。
-- **参数说明**:
-  - `refresh_token` (必填): `任意字符串即可`。
-  - `client_id` (必填): `任意字符串即可`。
-  - `email` (必填): `任意字符串即可`。
-  - `mailbox` (必填): `任意字符串即可`。
-  - `socks5` (可选): socks5 代理地址，格式为 `socks5://username:password@ip:port`。
-  - `http` (可选): http 代理地址，格式为 `http://ip:port`。
+你提得很对：这个项目当前主要是 WebUI 场景，`API_PASSWORD` 会增加使用复杂度，且容易和邮箱密码概念混淆。**已移除 API_PASSWORD 机制**，只保留 WebUI 登录鉴权（`WEBUI_PASSWORD`）。
+
+---
+
+## 常用运维命令
+
+```bash
+pm2 status
+pm2 logs email-panel
+pm2 restart email-panel
+pm2 stop email-panel
+```
+
+---
+
+## API 文档
+
+### 1) 获取最新的一封邮件
+- 方法：`GET/POST`
+- URL：`/api/mail_new`
+- 必填参数：`refresh_token`、`client_id`、`email`、`mailbox`
+- 可选参数：`socks5`、`http`
+
+### 2) 获取全部邮件
+- 方法：`GET/POST`
+- URL：`/api/mail_all`
+- 必填参数：`refresh_token`、`client_id`、`email`、`mailbox`
+- 可选参数：`socks5`、`http`
+
+### 3) 清空邮箱
+- 方法：`GET/POST`
+- URL：`/api/process-mailbox`
+- 必填参数：`refresh_token`、`client_id`、`email`、`mailbox`
+- 可选参数：`socks5`、`http`
+
+### 4) 代理测试
+- 方法：`GET/POST`
+- URL：`/api/test-proxy`
+- 必填参数：`refresh_token`、`client_id`、`email`、`mailbox`（可传任意字符串）
+- 可选参数：`socks5`、`http`
+
+---
+
+## 手动安装（可选）
+
+如果你不想用一键脚本，也可按以下手工部署：
+
+```bash
+git clone https://github.com/laijunquan216/Email-Management-Panel.git
+cd Email-Management-Panel
+npm install
+cd web/MS_OAuth2API_Next_Web && npm install && npm run build && cd ../../
+npm run start
+```
