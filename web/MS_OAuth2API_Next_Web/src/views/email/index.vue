@@ -43,12 +43,12 @@
         size="large"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column type="selection" width="55" />
-        <el-table-column type="index" label="#" width="70" />
-        <el-table-column show-overflow-tooltip prop="email" label="邮箱" min-width="240" />
-        <el-table-column show-overflow-tooltip prop="password" label="邮箱密码" min-width="180" />
+        <el-table-column type="selection" width="44" />
+        <el-table-column type="index" label="#" width="58" />
+        <el-table-column show-overflow-tooltip prop="email" label="邮箱" min-width="220" />
+        <el-table-column show-overflow-tooltip prop="password" label="邮箱密码" min-width="150" />
 
-        <el-table-column label="备注" min-width="220">
+        <el-table-column label="备注" min-width="200">
           <template #default="scope">
             <el-input
               v-model="scope.row.note"
@@ -66,12 +66,14 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="270">
+        <el-table-column label="操作" width="340">
           <template #default="scope">
-            <el-button size="small" type="primary" @click="handleEdit(scope.row, scope.$index)">编辑</el-button>
-            <el-button size="small" type="success" @click="handleInbox(scope.row)">收件箱</el-button>
-            <el-button size="small" type="success" @click="handleTrash(scope.row)">垃圾箱</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.row, scope.$index)">删除</el-button>
+            <div class="op-btns">
+              <el-button size="small" type="primary" @click="handleEdit(scope.row, scope.$index)">编辑</el-button>
+              <el-button size="small" type="success" @click="handleInbox(scope.row)">收件箱</el-button>
+              <el-button size="small" type="success" @click="handleTrash(scope.row)">垃圾箱</el-button>
+              <el-button size="small" type="danger" @click="handleDelete(scope.row, scope.$index)">删除</el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -486,4 +488,15 @@ const viewPost = (post: Post) => {
   display: flex;
   justify-content: center;
 }
+
+.op-btns {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.op-btns :deep(.el-button) {
+  margin-left: 0;
+}
+
 </style>

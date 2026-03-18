@@ -2,30 +2,31 @@
   <div class="home-container">
     <div class="content-box">
       <h3>介绍</h3>
-      <p>这是MS_OAuth2API_Next的配套使用工具。</p>
-      <p>MS_OAuth2API_Next项目的代码仓库地址：<a href="https://github.com/HChaoHui/MS_OAuth2API_Next" target="_blank">MS_OAuth2API_Next</a></p>
+      <p>这是 Email-Management-Panel 的控制台首页。</p>
+      <p>
+        项目仓库地址：
+        <a href="https://github.com/laijunquan216/Email-Management-Panel" target="_blank">Email-Management-Panel</a>
+      </p>
 
-      <h3>邮箱管理</h3>
+      <h3>面板功能</h3>
       <ul>
-        <li>导入邮箱(支持导入方式: 文件上传、粘贴导入)</li>
-        <li>邮箱列表(支持分页查询、搜索)</li>
-        <li>删除邮箱(支持批量删除)</li>
-        <li>导出邮箱(支持导出方式: 文件下载)</li>
-        <li>邮箱详情(查看邮箱的详细信息)</li>
-        <li>邮件列表(收件箱/垃圾箱、清空收件箱/垃圾箱)</li>
+        <li>邮箱导入（文件上传、粘贴导入）</li>
+        <li>邮箱列表管理（分页、批量删除、批量导出）</li>
+        <li>备注在线编辑</li>
+        <li>令牌状态检测</li>
+        <li>收件箱 / 垃圾箱邮件查看与清空</li>
       </ul>
 
-      <h3>联系作者</h3>
-      <p>如果您有任何问题或建议，请通过以下方式联系我：</p>
+      <h3>部署提示</h3>
       <ul>
-        <li>邮箱：<a href="mailto:z@unix.xin">z@unix.xin</a></li>
+        <li>推荐使用 README 中的一键安装脚本（Ubuntu / Debian）。</li>
+        <li>可按需开启 WebUI 登录密码与 Nginx 反向代理。</li>
       </ul>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-
 </script>
 
 <style scoped>
@@ -81,7 +82,6 @@ li:before {
   left: 0;
 }
 
-/* 第一个h3不需要顶部margin */
 h3:first-of-type {
   margin-top: 0;
 }
@@ -90,11 +90,11 @@ h3:first-of-type {
   .home-container {
     padding: 1rem;
   }
-  
+
   .content-box {
     padding: 1.5rem;
   }
-  
+
   h3 {
     font-size: 1.3rem;
   }

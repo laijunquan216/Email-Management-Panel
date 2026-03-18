@@ -69,6 +69,26 @@ pm2 stop email-panel
 
 ---
 
+
+## GitHub 更新后，服务器如何更新面板
+
+如果你在 GitHub 上改了代码，服务器上执行以下命令即可更新：
+
+```bash
+cd ~/Email-Management-Panel
+git pull --ff-only
+npm install
+cd web/MS_OAuth2API_Next_Web && npm install && npm run build && cd ../../
+pm2 restart email-panel
+```
+
+### 常见补充
+- 只改了前端：至少要执行 `npm run build` 并重启 PM2。
+- 改了 `.env`：改完后执行 `pm2 restart email-panel` 生效。
+- 不确定服务状态：执行 `pm2 status`、`pm2 logs email-panel`。
+
+---
+
 ## API 文档
 
 ### 1) 获取最新的一封邮件
