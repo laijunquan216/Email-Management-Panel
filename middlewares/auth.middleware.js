@@ -18,23 +18,6 @@ const isWebuiAuthed = (ctx) => {
   return cookieValue && cookieValue === buildWebuiCookieValue();
 };
 
-const authPasswordMiddleware = async (ctx, next) => {
-  const { password } = ctx.method === 'GET' ? ctx.query : ctx.request.body;
-  const expectedPassword = process.env.API_PASSWORD;
-
-  if (expectedPassword && password !== expectedPassword) {
-    ctx.status = 401;
-    ctx.body = {
-      code: '401',
-      error:
-        'Authentication failed. Please provide valid API password or contact administrator for access.',
-    };
-    return;
-  }
-
-  await next();
-};
-
 const authParamsMiddleware = async (ctx, next) => {
   const { refresh_token, client_id, email, mailbox } =
     ctx.method === 'GET' ? ctx.query : ctx.request.body;
@@ -68,7 +51,6 @@ module.exports = {
   WEBUI_COOKIE_NAME,
   buildWebuiCookieValue,
   isWebuiAuthed,
-  authPasswordMiddleware,
   authParamsMiddleware,
   webUiAuthRequiredMiddleware,
 };

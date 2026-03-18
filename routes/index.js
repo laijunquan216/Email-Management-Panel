@@ -2,7 +2,6 @@ const Router = require('koa-router');
 const apiRoutes = require('./api');
 const authRoutes = require('./auth');
 const {
-  authPasswordMiddleware,
   authParamsMiddleware,
   webUiAuthRequiredMiddleware,
 } = require('../middlewares/auth.middleware');
@@ -20,7 +19,6 @@ router.use(authRoutes.routes(), authRoutes.allowedMethods());
 router.use(
   '/api',
   webUiAuthRequiredMiddleware,
-  authPasswordMiddleware,
   authParamsMiddleware,
   apiRoutes.routes(),
   apiRoutes.allowedMethods()
