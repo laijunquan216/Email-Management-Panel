@@ -1,28 +1,32 @@
-const authPasswordMiddleware = async (ctx, next) => {
-  const { password } = ctx.method === "GET" ? ctx.query : ctx.request.body;
-  const expectedPassword = process.env.PASSWORD;
+const crypto = require('crypto');
 
-  if (expectedPassword && password !== expectedPassword) {
-    ctx.status = 401;
-    ctx.body = {
-      code: "401",
-      error:
-        "Authentication failed. Please provide valid credentials or contact administrator for access. Refer to API documentation for deployment details.",
-    };
-    return;
+const WEBUI_COOKIE_NAME = 'webui_auth';
+
+const buildWebuiCookieValue = () => {
+  const source = process.env.WEBUI_PASSWORD || '';
+  const salt = process.env.WEBUI_AUTH_SALT || 'email-panel';
+  return crypto.createHash('sha256').update(`${source}:${salt}`).digest('hex');
+};
+
+const isWebuiAuthed = (ctx) => {
+  const expectedPassword = process.env.WEBUI_PASSWORD;
+  if (!expectedPassword) {
+    return true;
   }
 
-  await next();
+  const cookieValue = ctx.cookies.get(WEBUI_COOKIE_NAME);
+  return cookieValue && cookieValue === buildWebuiCookieValue();
 };
 
 const authParamsMiddleware = async (ctx, next) => {
-  let { refresh_token, client_id, email, mailbox } = ctx.method === "GET" ? ctx.query : ctx.request.body;
+  const { refresh_token, client_id, email, mailbox } =
+    ctx.method === 'GET' ? ctx.query : ctx.request.body;
 
   if (!refresh_token || !client_id || !email || !mailbox) {
     ctx.status = 400;
     ctx.body = {
-      code: "400",
-      error: "Missing required parameters: refresh_token, client_id, email, or mailbox",
+      code: '400',
+      error: 'Missing required parameters: refresh_token, client_id, email, or mailbox',
     };
     return;
   }
@@ -30,7 +34,23 @@ const authParamsMiddleware = async (ctx, next) => {
   await next();
 };
 
+const webUiAuthRequiredMiddleware = async (ctx, next) => {
+  if (isWebuiAuthed(ctx)) {
+    await next();
+    return;
+  }
+
+  ctx.status = 401;
+  ctx.body = {
+    code: '401',
+    error: 'Web UI authentication required',
+  };
+};
+
 module.exports = {
-  authPasswordMiddleware,
+  WEBUI_COOKIE_NAME,
+  buildWebuiCookieValue,
+  isWebuiAuthed,
   authParamsMiddleware,
+  webUiAuthRequiredMiddleware,
 };
