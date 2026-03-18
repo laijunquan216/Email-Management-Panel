@@ -24,13 +24,13 @@ bash <(curl -fsSL https://raw.githubusercontent.com/laijunquan216/Email-Manageme
 
 ### 一键脚本会做什么？
 
-- 自动安装运行依赖（Node.js 20、git、build-essential、nginx、pm2）
+- 自动安装运行依赖（Node.js 20、git、build-essential、pm2）
 - 自动拉取/更新项目代码
 - 自动安装后端和前端依赖并打包 Web
 - 安装时可交互设置：
   - 服务端口（默认 3000）
   - WebUI 登录密码（可留空）
-  - Nginx 反向代理（可选，支持跳过）
+  - Nginx 反向代理（可选，支持跳过；仅选择时才安装/配置 Nginx）
 - 自动用 PM2 后台常驻启动，并尝试设置开机自启
 
 ---
