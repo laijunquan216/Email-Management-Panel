@@ -1,20 +1,24 @@
-const Router = require("koa-router");
-const apiRoutes = require("./api");
-const { authPasswordMiddleware, authParamsMiddleware } = require("../middlewares/auth.middleware");
+const Router = require('koa-router');
+const apiRoutes = require('./api');
+const authRoutes = require('./auth');
+const {
+  authParamsMiddleware,
+  webUiAuthRequiredMiddleware,
+} = require('../middlewares/auth.middleware');
 
 const router = new Router();
 
-// 根路由
-router.get("/", async (ctx) => {
+router.get('/', async (ctx) => {
   ctx.body = {
-    message: `Welcome to Be ${process.env.API_NAME || "MS_OAuth2API_Next"}`,
+    message: `Welcome to ${process.env.API_NAME || 'MS_OAuth2API_Next'}`,
   };
 });
 
-// API路由
+router.use(authRoutes.routes(), authRoutes.allowedMethods());
+
 router.use(
-  "/api",
-  authPasswordMiddleware,
+  '/api',
+  webUiAuthRequiredMiddleware,
   authParamsMiddleware,
   apiRoutes.routes(),
   apiRoutes.allowedMethods()
