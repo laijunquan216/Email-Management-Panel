@@ -50,7 +50,22 @@ REDIS_PORT=50002
 
 ## 服务端口
 PORT=3000
+
+## 数据库配置（用于持久化邮箱配置）
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_password
+DB_DATABASE=email_panel
+DB_WAIT_FOR_CONNECTIONS=true
+DB_CONNECTION_LIMIT=10
+DB_QUEUE_LIMIT=0
+
+## 敏感字段加密密钥（建议32字节随机值，支持base64）
+DATA_ENCRYPTION_KEY=
 ```
+
+> 若 MySQL 未配置或不可用，系统会自动降级到文件存储：`data/mail_accounts.json`（同样会对敏感字段加密）。
 
 ### 关于 `API_PASSWORD`
 
