@@ -65,6 +65,8 @@ DB_QUEUE_LIMIT=0
 DATA_ENCRYPTION_KEY=
 ```
 
+> 若 MySQL 未配置或不可用，系统会自动降级到文件存储：`data/mail_accounts.json`（同样会对敏感字段加密）。
+
 ### 关于 `API_PASSWORD`
 
 你提得很对：这个项目当前主要是 WebUI 场景，`API_PASSWORD` 会增加使用复杂度，且容易和邮箱密码概念混淆。**已移除 API_PASSWORD 机制**，只保留 WebUI 登录鉴权（`WEBUI_PASSWORD`）。
