@@ -171,11 +171,54 @@ const multipleSelection = ref<Email[]>([])
 const dialogCopyVisible = ref(false)
 const copyTextarea = ref('')
 
-const mailList = ref<Email[]>(JSON.parse(localStorage.getItem('localMailList') || '[]'))
+const LOCAL_FALLBACK_KEY = 'localMailList'
+
+const mailList = ref<Email[]>(JSON.parse(localStorage.getItem(LOCAL_FALLBACK_KEY) || '[]'))
 mailList.value = mailList.value.map((item) => ({ ...item, note: item.note || '', tokenStatus: item.tokenStatus || '未检测' }))
 
+let syncTimer: number | undefined
+
+const fetchServerList = async () => {
+  try {
+    const response = await fetch('/api/accounts', { credentials: 'include' })
+    const data = await response.json()
+    if (response.ok && data.code === '200' && Array.isArray(data.data)) {
+      mailList.value = data.data.map((item: Email) => ({ ...item, note: item.note || '', tokenStatus: item.tokenStatus || '未检测' }))
+      tablePagination.value.total = mailList.value.length
+      localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(mailList.value))
+      return
+    }
+    throw new Error('invalid response')
+  } catch (_error) {
+    mailList.value = mailList.value.map((item) => ({ ...item, note: item.note || '', tokenStatus: item.tokenStatus || '未检测' }))
+    tablePagination.value.total = mailList.value.length
+    if (mailList.value.length) ElMessage.warning('服务器数据读取失败，已使用浏览器本地缓存数据')
+  }
+}
+
+const syncServerList = async () => {
+  try {
+    const response = await fetch('/api/accounts/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ list: mailList.value }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok || data.code !== '200') {
+      throw new Error('sync failed')
+    }
+  } catch (_error) {
+    ElMessage.error('同步到服务器失败，已保留浏览器本地缓存')
+  }
+}
+
 const saveList = () => {
-  localStorage.setItem('localMailList', JSON.stringify(mailList.value))
+  localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(mailList.value))
+  window.clearTimeout(syncTimer)
+  syncTimer = window.setTimeout(() => {
+    syncServerList()
+  }, 300)
 }
 
 const tablePagination = ref({ currentPage: 1, pageSize: 10, total: mailList.value.length })
@@ -349,7 +392,8 @@ const calcTableHeight = computed(
 let formResizeObserver: ResizeObserver | null = null
 let paginationResizeObserver: ResizeObserver | null = null
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchServerList()
   nextTick(() => {
     formHeight.value = formRef.value?.$el?.offsetHeight || 0
     tablePaginationHeight.value = tablePaginationRef.value?.offsetHeight || 0
@@ -371,6 +415,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  window.clearTimeout(syncTimer)
   formResizeObserver?.disconnect()
   paginationResizeObserver?.disconnect()
 })
