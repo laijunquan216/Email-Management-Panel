@@ -171,7 +171,11 @@ const multipleSelection = ref<Email[]>([])
 const dialogCopyVisible = ref(false)
 const copyTextarea = ref('')
 
-const mailList = ref<Email[]>([])
+const LOCAL_FALLBACK_KEY = 'localMailList'
+
+const mailList = ref<Email[]>(JSON.parse(localStorage.getItem(LOCAL_FALLBACK_KEY) || '[]'))
+mailList.value = mailList.value.map((item) => ({ ...item, note: item.note || '', tokenStatus: item.tokenStatus || '未检测' }))
+
 let syncTimer: number | undefined
 
 const fetchServerList = async () => {
@@ -181,29 +185,36 @@ const fetchServerList = async () => {
     if (response.ok && data.code === '200' && Array.isArray(data.data)) {
       mailList.value = data.data.map((item: Email) => ({ ...item, note: item.note || '', tokenStatus: item.tokenStatus || '未检测' }))
       tablePagination.value.total = mailList.value.length
+      localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(mailList.value))
       return
     }
+    throw new Error('invalid response')
   } catch (_error) {
-    // ignore and use empty list
+    mailList.value = mailList.value.map((item) => ({ ...item, note: item.note || '', tokenStatus: item.tokenStatus || '未检测' }))
+    tablePagination.value.total = mailList.value.length
+    if (mailList.value.length) ElMessage.warning('服务器数据读取失败，已使用浏览器本地缓存数据')
   }
-  mailList.value = []
-  tablePagination.value.total = 0
 }
 
 const syncServerList = async () => {
   try {
-    await fetch('/api/accounts/sync', {
+    const response = await fetch('/api/accounts/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ list: mailList.value }),
     })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok || data.code !== '200') {
+      throw new Error('sync failed')
+    }
   } catch (_error) {
-    ElMessage.error('同步到服务器失败，请稍后重试')
+    ElMessage.error('同步到服务器失败，已保留浏览器本地缓存')
   }
 }
 
 const saveList = () => {
+  localStorage.setItem(LOCAL_FALLBACK_KEY, JSON.stringify(mailList.value))
   window.clearTimeout(syncTimer)
   syncTimer = window.setTimeout(() => {
     syncServerList()
